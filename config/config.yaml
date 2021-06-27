@@ -4,11 +4,14 @@ spark-config:
   filterPushdown: True
   appName: IMDB
   testAppName: TEST-IMDB
-  host: local[*]
+  host: spark://spark:7077
+  #host: local[*]
+
 jobs-param:
   year: 2021
   top_n_collaborations: 10
   distribution_past_years: 100
+
 path:
   movies: /resources/data/title_basics/data.tsv
   relation: /resources/data/principals/data.tsv
