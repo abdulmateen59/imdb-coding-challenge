@@ -28,7 +28,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--Remote",
-                        action=argparse.BooleanOptionalAction,
+                        type=bool,
+                        nargs='?',
                         default=False, help=f'Remote host needs to be configured from configuration file')
     args = parser.parse_args()
 
