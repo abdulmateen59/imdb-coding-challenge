@@ -17,7 +17,7 @@ class PySparkTestCase(unittest.TestCase):
 
         cls.sqlContext = SparkSession.builder \
             .master(cls.config['spark-config']['host']) \
-            .appName(cls.config['spark-config']['appName']) \
+            .appName(cls.config['spark-config']['testAppName']) \
             .config('spark.sql.shuffle.partitions', cls.config['spark-config']['partitions']) \
             .config('spark.sql.orc.filterPushdown', cls.config['spark-config']['filterPushdown']) \
             .getOrCreate()
