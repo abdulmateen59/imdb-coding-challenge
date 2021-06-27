@@ -7,18 +7,16 @@ Email: abdul.mateen59@yahoo.com
 IMDB Movies Dataset
 - https://datasets.imdbws.com/
 """
+import argparse
 import logging
 import os
-import yaml
 
-from pyspark import SparkConf
-from pyspark import SparkContext
-from pyspark import sql
-from pyspark.sql import SparkSession
+import yaml
 from jobs.collaborations import actor_director_collab
 from jobs.distribution import movies_per_year
 from jobs.distribution import plot_distribution
 from jobs.frequent_genres import most_genre_actor_worked_in
+from pyspark.sql import SparkSession
 
 if __name__ == '__main__':
     logger = logging.getLogger(__name__)
@@ -28,18 +26,25 @@ if __name__ == '__main__':
     with open('config/config.yaml', 'r') as f:
         config = yaml.safe_load(f)
 
-    conf = SparkConf().setAppName(config['spark-config']['appName']).setMaster(config['spark-config']['host'])
-    sc = SparkContext(conf=conf)
-    sc.setLogLevel('WARN')
-    sqlContext = sql.SQLContext(sc)
-    sqlContext.setConf('spark.sql.shuffle.partitions', config['spark-config']['partitions'])
-    sqlContext.setConf('spark.sql.orc.filterPushdown', config['spark-config']['filterPushdown'])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--Remote",
+                        action=argparse.BooleanOptionalAction,
+                        default=False, help=f'Remote host needs to be configured from configuration file')
+    args = parser.parse_args()
+
+    spark_session = SparkSession.builder \
+        .master(config['spark-config']['host'] if args.Remote else 'local[*]') \
+        .appName(config['spark-config']['appName']) \
+        .config('spark.sql.shuffle.partitions', config['spark-config']['partitions']) \
+        .config('spark.sql.orc.filterPushdown', config['spark-config']['filterPushdown']) \
+        .getOrCreate()
+    spark_session.sparkContext.setLogLevel('WARN')
 
     logger.info('Loading files...')
-    movies = sqlContext.read.options(header=True, sep=r'\t').csv(f"{os.getcwd()}{config['path']['movies']}")
-    relation = sqlContext.read.options(header=True, sep=r'\t').csv(f'{os.getcwd()}'
-                                                                   f"{config['path']['relation']}")
-    artists = sqlContext.read.options(header=True, sep=r'\t').csv(f"{os.getcwd()}{config['path']['artists']}")
+    movies = spark_session.read.options(header=True, sep=r'\t').csv(f"{os.getcwd()}{config['path']['movies']}")
+    relation = spark_session.read.options(header=True, sep=r'\t').csv(f'{os.getcwd()}'
+                                                                      f"{config['path']['relation']}")
+    artists = spark_session.read.options(header=True, sep=r'\t').csv(f"{os.getcwd()}{config['path']['artists']}")
 
     logger.info('Starting job (films produced annually and their distribution over the past 100 years)...')
     plot_distribution(movies_per_year(movies),
@@ -63,4 +68,4 @@ if __name__ == '__main__':
     most_genre_actor_worked_in('Saoirse Ronan', relation, movies, artists).show()
     logger.info('Job successfully executed')
 
-    sc.stop()
+    spark_session.stop()
