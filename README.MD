@@ -26,7 +26,7 @@ make stop
 ```
 
 *`Execution time of the solution is aproximately 02 mins with 04 cores and 12G of memory.`*
-
+</br>*`The distribution graph is stored in resources/graph`*
 
 ## Without Docker
 To run the solution locally, open config file, comment out line `07` and remove the comment character from line `08`.
