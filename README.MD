@@ -1,5 +1,5 @@
 
-# Relayr Coding Challenge
+# IMDB Coding Challenge
 
 ## Note
 Make sure that the correct host is selected in the configuration file. Also, provide the data path for `Movies Title`, `Actors Details`, and `Principals` in the configuration or place the files in already created folders.
